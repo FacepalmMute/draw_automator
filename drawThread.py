@@ -49,8 +49,9 @@ class drawThread(QThread):
 
         print("Draw {0} polygons/lines". format(len(img.contours)))
         for polygon in img.contours:
-            self.draw_polygon(polygon)
-        
+            if not self.draw_polygon(polygon):
+                break
+
         g.moveTo(self.window[2], self.window[3])
         self.window.clear()
         self.status.emit()
@@ -68,26 +69,27 @@ class drawThread(QThread):
             # Stop listener˚
             return False
 
-    def killswitch(self):
+    def killswitch(self) -> bool:
         print("TRIGGERED KILLSWITCH")
         self.status.emit()
-        # self.quit()
+        return False
 
-    def draw_polygon(self, polygon):
+    def draw_polygon(self, polygon) -> bool:
         g.mouseDown(polygon[0][1] + self.window[0], polygon[0][0] + self.window[1], duration=duration, button='left')
 
         if (sum(np.absolute(np.subtract((polygon[0][1] + self.window[0], polygon[0][0] + self.window[1]), g.position()))) > kill_threshold):
-            self.killswitch()
+            return self.killswitch()
 
         for dot in polygon:
             g.moveTo(dot[1] + self.window[0], dot[0] + self.window[1], duration=duration)
 
             if (sum(np.absolute(np.subtract((dot[1] + self.window[0], dot[0] + self.window[1]), g.position()))) > kill_threshold):
                 g.mouseUp(duration=duration, button='left')
-                self.killswitch()
+                return self.killswitch()
 
         print(g.position())
         g.mouseUp(duration=duration, button='left')
+        return True
 
     # def __draw_polyhon2(polygon):
     #     with Controller() as controller:
