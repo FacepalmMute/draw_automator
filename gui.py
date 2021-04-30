@@ -6,6 +6,9 @@ from PyQt5.QtCore import Qt
 from imageThread import *
 from drawThread import *
 
+# Knows Bugs:
+# Preview image is broken after killswitch triggered. drawThread possibly broke the reference.
+
 class Gui(QWidget):
     
     defaultLevel = 10
@@ -69,6 +72,13 @@ class Gui(QWidget):
             )
             self.requestImage(self.currentImage)
         elif mime.hasUrls():
+            print("URL")
+            self.currentImage = imgFormat(self.fetchImage(mime.urls()[0].toString()),
+                self.defaultLevel,
+                None,
+                (self.width, self.height)
+            )
+            self.requestImage(self.currentImage)
             pass
 
     def keyPressEvent(self, event: QKeyEvent):
@@ -92,6 +102,15 @@ class Gui(QWidget):
                 self.requestImage(self.currentImage)
             elif mime.hasUrls():
                 print("URL")
+            elif mime.hasText():
+                print("Text")
+                self.currentImage = imgFormat(
+                    self.fetchImage(clipboard.text()),
+                    self.defaultLevel,
+                    None,
+                    (self.width, self.height)
+                )
+                self.requestImage(self.currentImage)
             else:
                 print("Unknown type")
 
@@ -102,9 +121,9 @@ class Gui(QWidget):
         elif (("http://" in data) or ("https://" in data)):
             print("Use web image")
             img = urlToImage(data)
-        elif (data != None):
+        elif ("file://" in data):
             print("Use local image")
-            img = cv2.imread(data)
+            img = cv2.imread(data[6:])
         else:
             print("Invalid image source")
             return None
@@ -147,7 +166,7 @@ class Gui(QWidget):
 def uriTocvmat(uri):
     encoded_data = uri.split(',')[1]
     nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_ANYCOLOR)
+    img = cv2.imdecode(nparr, cv2.COLOR_BGRA2GRAY)
     return img
 
 def urlToImage(url):
@@ -177,4 +196,8 @@ def to_tuple(lst):
 
 app = QApplication([])
 gui = Gui()
+
+# # Window should stay on top
+# # TODO seems not to be working propertly
+# gui.setWindowFlags(gui.windowFlags() | Qt.WindowStaysOnTopHint)
 app.exec_()
