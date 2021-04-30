@@ -17,7 +17,7 @@ p_level = 0
 g.PAUSE = 0
 
 # Made pull request. Currently using my branch
-g.DARWIN_CATCH_UP_TIME = 0.001
+g.DARWIN_CATCH_UP_TIME = 0.002
 kill_threshold = 50
 
 def data_uri_to_cv2_img(uri):

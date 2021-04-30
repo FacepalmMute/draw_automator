@@ -21,7 +21,7 @@ g.PAUSE = 0
 
 # Made pull request. Currently using my branch
 g.DARWIN_CATCH_UP_TIME = 0.005
-kill_threshold = 50
+kill_threshold = 100
 
 class drawThread(QThread):
 
