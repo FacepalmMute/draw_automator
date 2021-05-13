@@ -1,5 +1,12 @@
-from PyQt5.QtCore import (QCoreApplication, QObject, QRunnable, QThread,
-                          QThreadPool, pyqtSignal, pyqtSlot)
+from PyQt5.QtCore import (
+    QCoreApplication,
+    QObject,
+    QRunnable,
+    QThread,
+    QThreadPool,
+    pyqtSignal,
+    pyqtSlot,
+)
 
 import pyautogui as g
 import sys
@@ -21,7 +28,8 @@ g.PAUSE = 0
 
 # Made pull request. Currently using my branch
 g.DARWIN_CATCH_UP_TIME = 0.005
-kill_threshold = 100
+kill_threshold = 200
+
 
 class drawThread(QThread):
 
@@ -40,14 +48,21 @@ class drawThread(QThread):
             listener.join()
             listener.stop()
 
-        print('Pressed {0} / {1}. Released {2} / {3}'.format(self.window[0], self.window[1], self.window[2], self.window[3]))
-        self.img.size = (self.window[2] - self.window[0], self.window[3] - self.window[1])
+        print(
+            "Pressed {0} / {1}. Released {2} / {3}".format(
+                self.window[0], self.window[1], self.window[2], self.window[3]
+            )
+        )
+        self.img.size = (
+            self.window[2] - self.window[0],
+            self.window[3] - self.window[1],
+        )
 
         worker = imageThread(self)
         img = worker.processImage(self.img)
         worker.terminate()
 
-        print("Draw {0} polygons/lines". format(len(img.contours)))
+        print("Draw {0} polygons/lines".format(len(img.contours)))
         for polygon in img.contours:
             if not self.draw_polygon(polygon):
                 break
@@ -58,10 +73,8 @@ class drawThread(QThread):
 
     def set_window(self, x, y, button, pressed):
         print(button)
-        if (len(self.window) <= 2):
-            print('{0} at {1}'.format(
-                'Pressed' if pressed else 'Released',
-                (x, y)))
+        if len(self.window) <= 2:
+            print("{0} at {1}".format("Pressed" if pressed else "Released", (x, y)))
             self.window.append(round(x))
             self.window.append(round(y))
 
@@ -75,20 +88,50 @@ class drawThread(QThread):
         return False
 
     def draw_polygon(self, polygon) -> bool:
-        g.mouseDown(polygon[0][1] + self.window[0], polygon[0][0] + self.window[1], duration=duration, button='left')
+        g.mouseDown(
+            polygon[0][1] + self.window[0],
+            polygon[0][0] + self.window[1],
+            duration=duration,
+            button="left",
+        )
 
-        if (sum(np.absolute(np.subtract((polygon[0][1] + self.window[0], polygon[0][0] + self.window[1]), g.position()))) > kill_threshold):
+        if (
+            sum(
+                np.absolute(
+                    np.subtract(
+                        (
+                            polygon[0][1] + self.window[0],
+                            polygon[0][0] + self.window[1],
+                        ),
+                        g.position(),
+                    )
+                )
+            )
+            > kill_threshold
+        ):
             return self.killswitch()
 
         for dot in polygon:
-            g.moveTo(dot[1] + self.window[0], dot[0] + self.window[1], duration=duration)
+            g.moveTo(
+                dot[1] + self.window[0], dot[0] + self.window[1], duration=duration
+            )
 
-            if (sum(np.absolute(np.subtract((dot[1] + self.window[0], dot[0] + self.window[1]), g.position()))) > kill_threshold):
-                g.mouseUp(duration=duration, button='left')
+            if (
+                sum(
+                    np.absolute(
+                        np.subtract(
+                            (dot[1] + self.window[0], dot[0] + self.window[1]),
+                            g.position(),
+                        )
+                    )
+                )
+                > kill_threshold
+            ):
+                g.mouseUp(duration=duration, button="left")
                 return self.killswitch()
 
         print(g.position())
-        g.mouseUp(duration=duration, button='left')
+        g.mouseUp(duration=duration, button="left")
         return True
 
     # def __draw_polyhon2(polygon):
@@ -121,10 +164,15 @@ class drawThread(QThread):
         duration = 0.01
         scaler = 5
 
-        if (self.window[0] > 0 and self.window[1] > 0 and self.window[2] > 0 and self.window[3] > 0):
+        if (
+            self.window[0] > 0
+            and self.window[1] > 0
+            and self.window[2] > 0
+            and self.window[3] > 0
+        ):
             g.mouseDown(s_x, s_y, duration=duration)
 
-            while (e_x > s_x or e_y > s_y):
+            while e_x > s_x or e_y > s_y:
                 g.moveTo(e_x, s_y, duration=duration)
                 g.moveTo(e_x, e_y, duration=duration)
                 g.moveTo(s_x, e_y, duration=duration)

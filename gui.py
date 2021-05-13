@@ -1,6 +1,24 @@
 from typing import Optional
-from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QWidget, QTableView, QAbstractItemView, QSlider, QVBoxLayout
-from PyQt5.QtGui import QIcon, QPicture, QPixmap, QKeySequence, QKeyEvent, QImage, QDragEnterEvent, QPalette
+from PyQt5.QtWidgets import (
+    QApplication,
+    QLabel,
+    QPushButton,
+    QWidget,
+    QTableView,
+    QAbstractItemView,
+    QSlider,
+    QVBoxLayout,
+)
+from PyQt5.QtGui import (
+    QIcon,
+    QPicture,
+    QPixmap,
+    QKeySequence,
+    QKeyEvent,
+    QImage,
+    QDragEnterEvent,
+    QPalette,
+)
 from PyQt5.QtCore import Qt
 
 from imageThread import *
@@ -8,16 +26,18 @@ from drawThread import *
 
 # Knows Bugs:
 # Preview image is broken after killswitch triggered. drawThread possibly broke the reference.
+# Preview background shows garbage after rescaling
+
 
 class Gui(QWidget):
-    
+
     defaultLevel = 10
 
     __imgThread_ready = True
 
     def __init__(self):
         super().__init__()
-        self.title = 'PyQt5 image - pythonspot.com'
+        self.title = "PyQt5 image - pythonspot.com"
         self.left = 10
         self.top = 10
         self.width = 640
@@ -33,8 +53,8 @@ class Gui(QWidget):
         # Image label
         self.imageLabel = QLabel(self)
         self.imageLabel.setBackgroundRole(QPalette.Base)
-        pixmap = QPixmap('examples/ein_hauch_von_tuell.jpg')
-        self.resize(pixmap.width(),pixmap.height())
+        pixmap = QPixmap("examples/ein_hauch_von_tuell.jpg")
+        self.resize(pixmap.width(), pixmap.height())
         self.layout.addWidget(self.imageLabel)
 
         # Slider
@@ -59,7 +79,7 @@ class Gui(QWidget):
         self.show()
 
     def dragEnterEvent(self, e: QDragEnterEvent):
-        print('Drag Event : ', end="")
+        print("Drag Event : ", end="")
         mime = e.mimeData()
 
         if mime.hasImage():
@@ -68,15 +88,16 @@ class Gui(QWidget):
                 QImageTocvmat(mime.imageData()),
                 self.defaultLevel,
                 None,
-                (self.width, self.height)
+                (self.width, self.height),
             )
             self.requestImage(self.currentImage)
         elif mime.hasUrls():
             print("URL")
-            self.currentImage = imgFormat(self.fetchImage(mime.urls()[0].toString()),
+            self.currentImage = imgFormat(
+                self.fetchImage(mime.urls()[0].toString()),
                 self.defaultLevel,
                 None,
-                (self.width, self.height)
+                (self.width, self.height),
             )
             self.requestImage(self.currentImage)
             pass
@@ -85,7 +106,7 @@ class Gui(QWidget):
         clipboard = QApplication.clipboard()
 
         if event.matches(QKeySequence.Copy):
-            print('Ctrl + C')
+            print("Ctrl + C")
             clipboard.setText("some text")
         if event.matches(QKeySequence.Paste):
             print("Clip Event : ", end="")
@@ -97,7 +118,7 @@ class Gui(QWidget):
                     QImageTocvmat(clipboard.image()),
                     self.defaultLevel,
                     None,
-                    (self.width, self.height)
+                    (self.width, self.height),
                 )
                 self.requestImage(self.currentImage)
             elif mime.hasUrls():
@@ -108,20 +129,20 @@ class Gui(QWidget):
                     self.fetchImage(clipboard.text()),
                     self.defaultLevel,
                     None,
-                    (self.width, self.height)
+                    (self.width, self.height),
                 )
                 self.requestImage(self.currentImage)
             else:
                 print("Unknown type")
 
     def fetchImage(self, data: Any) -> Optional[Any]:
-        if ("data:image/" in data):
+        if "data:image/" in data:
             print("Use base64 image")
             img = uriTocvmat(data)
-        elif (("http://" in data) or ("https://" in data)):
+        elif ("http://" in data) or ("https://" in data):
             print("Use web image")
             img = urlToImage(data)
-        elif ("file://" in data):
+        elif "file://" in data:
             print("Use local image")
             img = cv2.imread(data[6:])
         else:
@@ -164,15 +185,17 @@ class Gui(QWidget):
 
 
 def uriTocvmat(uri):
-    encoded_data = uri.split(',')[1]
+    encoded_data = uri.split(",")[1]
     nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
     img = cv2.imdecode(nparr, cv2.COLOR_BGRA2GRAY)
     return img
+
 
 def urlToImage(url):
     print("downloading {0}".format(url))
     img = io.imread(url)
     return img
+
 
 def QImageTocvmat(img: QImage):
     img = img.convertToFormat(QImage.Format_RGBX8888)
@@ -186,13 +209,16 @@ def QImageTocvmat(img: QImage):
     ret.flags.writeable = False
     return ret
 
+
 def cvmatToQImage(img: Any) -> QImage:
     bytesPerLine = 3 * 640
     qImg = QImage(img, 640, 640, bytesPerLine, QImage.Format_RGB666)
     return qImg
 
+
 def to_tuple(lst):
     return tuple(to_tuple(i) if isinstance(i, list) else i for i in lst)
+
 
 app = QApplication([])
 gui = Gui()

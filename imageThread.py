@@ -8,8 +8,9 @@ import cv2
 import copy
 import time
 
-window = [0,0,640,640]
+window = [0, 0, 640, 640]
 # level = 180
+
 
 @dataclass
 class imgFormat:
@@ -17,6 +18,7 @@ class imgFormat:
     level: int
     contours: list
     size: list
+
 
 class imageThread(QThread):
 
@@ -44,7 +46,7 @@ class imageThread(QThread):
 
         # cv2.imwrite('debug/converted.jpg', img.img, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
 
-        #new image without alpha channel...
+        # new image without alpha channel...
         res_img = imageResize(img.img, width=img.size[0], height=img.size[1])
 
         conv_img = cv2.cvtColor(res_img, cv2.COLOR_BGRA2GRAY)
@@ -60,9 +62,11 @@ class imageThread(QThread):
 
 
 def extractLines(img, level):
-    contours = find_contours(img, level, fully_connected='high', positive_orientation='low')
+    contours = find_contours(
+        img, level, fully_connected="high", positive_orientation="low"
+    )
 
-    result_contour = np.zeros(img.shape + (3, ), np.uint8)
+    result_contour = np.zeros(img.shape + (3,), np.uint8)
     # result_polygon1 = np.zeros(img.shape + (3, ), np.uint8)
     # result_polygon2 = np.zeros(img.shape + (3, ), np.uint8)
 
@@ -87,10 +91,9 @@ def extractLines(img, level):
 
         # draw contour lines
         for idx, coords in enumerate(contour[:-1]):
-                y1, x1, y2, x2 = coords + contour[idx + 1]
-                line = cv2.line(result_contour, (x1, y1), (x2, y2),
-                                        (0, 255, 0), 1)
-                result_contour = line
+            y1, x1, y2, x2 = coords + contour[idx + 1]
+            line = cv2.line(result_contour, (x1, y1), (x2, y2), (0, 255, 0), 1)
+            result_contour = line
         # draw polygon 1 lines
         # for idx, coords in enumerate(polygon1[:-1]):
         #         y1, x1, y2, x2 = coords + polygon1[idx + 1]
@@ -104,13 +107,14 @@ def extractLines(img, level):
         #                                 (0, 255, 0), 1)
         #         result_polygon2 = line
 
-    cv2.imwrite('debug/contour_lines.png', result_contour)
+    cv2.imwrite("debug/contour_lines.png", result_contour)
     # cv2.imwrite('debug/polygon1_lines.png', result_polygon1)
     # cv2.imwrite('debug/polygon2_lines.png', result_polygon2)
 
     return result_contour, return_contour
 
-def imageResize(image, width = None, height = None, inter = cv2.INTER_AREA):
+
+def imageResize(image, width=None, height=None, inter=cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
     # grab the image size
     dim = None
@@ -136,7 +140,7 @@ def imageResize(image, width = None, height = None, inter = cv2.INTER_AREA):
         dim = (width, int(h * r))
 
     # resize the image
-    resized = cv2.resize(image, dim, interpolation = inter)
+    resized = cv2.resize(image, dim, interpolation=inter)
 
     # return the resized image
     return resized
