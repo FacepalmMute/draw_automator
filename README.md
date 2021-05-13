@@ -18,5 +18,5 @@ Always begin in the upper left corner and release it at the bottom right corner.
 The picture should now be painted. The automation can be stopped by shaking the mouse randomly in all directions.
 
 # TODO
-Better README
-Releases with executables for Windows, macOS and Linux
+* Better README
+* Releases with executables for Windows, macOS and Linux
