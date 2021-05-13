@@ -19,3 +19,4 @@ The picture should now be painted. The automation can be stopped by shaking the 
 
 # TODO
 Better README
+Releases with executables for Windows, macOS and Linux
